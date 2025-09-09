@@ -64,6 +64,9 @@ export default {
     contactAdmin: '请联系管理员获取授权',
     captcha: '人机验证',
     captchaRequired: '请完成人机验证',
+    captchaPlaceholder: '请输入验证码',
+    captchaHint: '点击图片刷新验证码',
+    captchaLoadFailed: '验证码加载失败',
     verifyTokenSuccess: '令牌验证成功',
     verifyTokenFailed: '令牌验证失败，请重试'
   },

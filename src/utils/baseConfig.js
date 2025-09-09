@@ -164,8 +164,8 @@ export const AUTHORIZED_DOMAINS = getConfig('AUTHORIZED_DOMAINS', DEFAULT_AUTHOR
  * 控制注册和登录页面的验证方式
  */
 const DEFAULT_CAPTCHA_CONFIG = {
-    // 验证方式: 'google' 或 'cloudflare'
-    captchaType: 'google',
+    // 验证方式: 'google', 'cloudflare', 或 'v2board'
+    captchaType: 'v2board',
 
     // Google reCAPTCHA 配置 默认v2
     google: {
@@ -177,6 +177,14 @@ const DEFAULT_CAPTCHA_CONFIG = {
     cloudflare: {
         // 验证API地址
         verifyUrl: 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+    },
+
+    // V2Board 内置验证码配置
+    v2board: {
+        // 生成验证码API
+        generateUrl: '/api/v1/passport/captcha/generate',
+        // 验证API
+        verifyUrl: '/api/v1/passport/captcha/verify'
     }
 };
 

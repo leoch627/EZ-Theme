@@ -383,15 +383,23 @@
 
             <!-- 验证码组件 -->
 
-            <div class="form-group" v-if="config.is_recaptcha === 1">
+            <div class="form-group" v-if="config.is_recaptcha === 1 || captchaConfig.type === 'v2board'">
 
               <label class="form-label">{{ $t('auth.captcha') }} <span class="required">*</span></label>
 
               <div class="captcha-container">
 
+                <!-- V2Board 内置验证码 -->
+                <V2BoardCaptcha
+                  v-if="captchaConfig.type === 'v2board'"
+                  v-model="formData.captcha"
+                  v-model:captcha-key="formData.captchaKey"
+                  @refresh="handleCaptchaRefresh"
+                />
+
                 <!-- Google reCAPTCHA -->
 
-                <div v-if="captchaConfig.type === 'google'" class="google-captcha" @click.stop>
+                <div v-else-if="captchaConfig.type === 'google'" class="google-captcha" @click.stop>
 
                   <div id="form-recaptcha"></div>
 
@@ -609,6 +617,8 @@ import IconEyeOff from '@/components/icons/IconEyeOff.vue';
 
 import IconChevronDown from '@/components/icons/IconChevronDown.vue';
 
+import V2BoardCaptcha from '@/components/captcha/V2BoardCaptcha.vue';
+
 import { register, checkLoginStatus, getWebsiteConfig, sendEmailVerify } from '@/api/auth';
 
 
@@ -708,6 +718,8 @@ export default {
     IconEyeOff,
 
     IconChevronDown,
+
+    V2BoardCaptcha,
 
     DomainAuthAlert,
 
@@ -929,6 +941,10 @@ export default {
       confirmPassword: '',
 
       inviteCode: '',
+
+      captcha: '',
+
+      captchaKey: '',
 
       agreeTerms: AUTH_CONFIG.autoAgreeTerms
 
@@ -1486,7 +1502,15 @@ export default {
 
 
 
-      if (config.is_recaptcha === 1) {
+      // 验证V2Board内置验证码
+      if (captchaConfig.type === 'v2board') {
+        if (!formData.captcha || !formData.captchaKey) {
+          showToast(t('auth.captchaRequired'), 'error');
+          isValid = false;
+        }
+      }
+      // 验证Google reCAPTCHA和Cloudflare Turnstile
+      else if (config.is_recaptcha === 1) {
 
         const formCaptchaElement = document.querySelector('[name="g-recaptcha-response"]') ||
 
@@ -1515,6 +1539,12 @@ export default {
     };
 
 
+
+    const handleCaptchaRefresh = (data) => {
+      // V2Board验证码刷新处理
+      formData.captcha = '';
+      formData.captchaKey = data.key;
+    };
 
     const handleRegister = async () => {
 
@@ -1554,7 +1584,13 @@ export default {
 
 
 
-        if (config.is_recaptcha === 1) {
+        // 处理V2Board内置验证码
+        if (captchaConfig.type === 'v2board' && formData.captcha && formData.captchaKey) {
+          registerData.captcha = formData.captcha;
+          registerData.captcha_key = formData.captchaKey;
+        }
+        // 处理Google reCAPTCHA和Cloudflare Turnstile
+        else if (config.is_recaptcha === 1) {
 
           const formCaptchaElement = document.querySelector('[name="g-recaptcha-response"]') ||
 
@@ -2278,6 +2314,8 @@ export default {
       sendVerificationCode,
 
       handleRegister,
+
+      handleCaptchaRefresh,
 
       isValidEmail,
 
